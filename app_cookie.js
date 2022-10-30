@@ -31,5 +31,18 @@ app.get("/products", (req, res) => {
     <a href="/cart">Cart</a>
   `);
 });
+/**
+ * cart = {
+ *  1: 2,
+ *  2: 1
+ * }
+ */
+app.get("/cart/:id", (req, res) => {
+  const id = req.params.id;
+  const cart = req.cookies.cart || {};
+  cart[id] = (+cart[id] || 0) + 1;
+  res.cookie("cart", cart);
+  res.redirect("/cart");
+});
 
 app.listen(3003, () => console.log("server on 3003"));
