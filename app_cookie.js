@@ -15,14 +15,22 @@ const products = {
   2: { title: "new web" },
 };
 app.get("/products", (req, res) => {
-  let output = "";
-  for (const key in products) {
-    output += `
+  const output = Object.keys(products)
+    .map(
+      (key) => `
       <li>
         <a href="/cart/${key}">${products[key].title}</a>
-      </li>
-    `;
-  }
+      </li>`
+    )
+    .join("");
+  // let output = "";
+  // for (const key in products) {
+  //   output += `
+  //     <li>
+  //       <a href="/cart/${key}">${products[key].title}</a>
+  //     </li>
+  //   `;
+  // }
   res.send(`
     <h1>Products</h1>
     <ul>
@@ -43,6 +51,26 @@ app.get("/cart/:id", (req, res) => {
   cart[id] = (+cart[id] || 0) + 1;
   res.cookie("cart", cart);
   res.redirect("/cart");
+});
+app.get("/cart", (req, res) => {
+  const cart = req.cookies.cart;
+  if (!cart) {
+    res.send("Empty");
+  }
+  const output = Object.keys(cart)
+    .map(
+      (key) => `
+      <li>
+        ${products[key].title} (${cart[key]})
+      </li>`
+    )
+    .join("");
+  res.send(`
+    <h1>Cart</h1>
+    <ul>
+      ${output}
+    </ul>
+    <a href="/products">Products</a>`);
 });
 
 app.listen(3003, () => console.log("server on 3003"));
