@@ -2,11 +2,11 @@ import express from "express";
 import cookieParser from "cookie-parser";
 
 const app = express();
-app.use(cookieParser());
+app.use(cookieParser("1q2w3e4r"));
 
 app.get("/count", (req, res) => {
-  const count = +req.cookies.count || 0;
-  res.cookie("count", count + 1);
+  const count = +req.signedCookies.count || 0;
+  res.cookie("count", count + 1, { signed: true });
   res.send("count: " + count);
 });
 
@@ -47,13 +47,13 @@ app.get("/products", (req, res) => {
  */
 app.get("/cart/:id", (req, res) => {
   const id = req.params.id;
-  const cart = req.cookies.cart || {};
+  const cart = req.signedCookies.cart || {};
   cart[id] = (+cart[id] || 0) + 1;
-  res.cookie("cart", cart);
+  res.cookie("cart", cart, { signed: true });
   res.redirect("/cart");
 });
 app.get("/cart", (req, res) => {
-  const cart = req.cookies.cart;
+  const cart = req.signedCookies.cart;
   if (!cart) {
     res.send("Empty");
   }
