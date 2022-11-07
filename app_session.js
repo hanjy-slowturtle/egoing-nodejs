@@ -2,6 +2,9 @@ import express from "express";
 import session from "express-session";
 import bodyParser from "body-parser";
 
+/**
+ * app setting
+ */
 const app = express();
 app.use(
   session({
@@ -12,13 +15,19 @@ app.use(
 );
 app.use(bodyParser.urlencoded({ extended: false }));
 
+/**
+ * counter
+ */
 app.get("/count", (req, res) => {
-  const count = +req.session.count || 1;
+  const count = +req.session.count || 0;
   req.session.count = count + 1;
   res.send("count: " + count);
 });
 
-app.get("/auth/login", (req, res) => {
+/**
+ * login
+ */
+app.get("/auth/login", (_, res) => {
   const output = `
     <h1>Login</h1>
     <form action="/auth/login" method="post">
@@ -42,8 +51,7 @@ app.post("/auth/login", (req, res) => {
       displayName: "hanjy",
     },
   };
-  const username = req.body.username;
-  const password = req.body.password;
+  const { username, password } = req.body;
   if (userData[username] && userData[username].password === password) {
     req.session.loginData = {
       displayName: userData[username].displayName,
@@ -55,8 +63,9 @@ app.post("/auth/login", (req, res) => {
 });
 app.get("/welcome", (req, res) => {
   if (req.session.loginData) {
+    const { displayName } = req.session.loginData;
     res.send(`
-      <h1>Hello, ${req.session.loginData.displayName}</h1>
+      <h1>Hello, ${displayName}</h1>
       <a href="/auth/logout">logout</a>
     `);
   } else {
@@ -67,8 +76,11 @@ app.get("/welcome", (req, res) => {
   }
 });
 app.get("/auth/logout", (req, res) => {
-  req.session.loginData = null;
-  res.redirect("/auth/login");
+  delete req.session.loginData;
+  res.redirect("/welcome");
 });
 
+/**
+ * app run
+ */
 app.listen(3003, () => console.log("server on 3003"));
