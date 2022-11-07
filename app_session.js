@@ -39,15 +39,36 @@ app.post("/auth/login", (req, res) => {
   const userData = {
     hello: {
       password: "123",
+      displayName: "hanjy",
     },
   };
   const username = req.body.username;
   const password = req.body.password;
   if (userData[username] && userData[username].password === password) {
+    req.session.loginData = {
+      displayName: userData[username].displayName,
+    };
     res.redirect("/welcome");
   } else {
     res.send(`Fail <a href="/auth/login">login</a>`);
   }
+});
+app.get("/welcome", (req, res) => {
+  if (req.session.loginData) {
+    res.send(`
+      <h1>Hello, ${req.session.loginData.displayName}</h1>
+      <a href="/auth/logout">logout</a>
+    `);
+  } else {
+    res.send(`
+      <h1>Welcome</h1>
+      <a href="/auth/login">Login</a>
+    `);
+  }
+});
+app.get("/auth/logout", (req, res) => {
+  req.session.loginData = null;
+  res.redirect("/auth/login");
 });
 
 app.listen(3003, () => console.log("server on 3003"));
